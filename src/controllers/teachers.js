@@ -1,27 +1,29 @@
-import ProblemError from "../util/ProblemError";
-import {
-  NO_TODO_FOUND,
-  NO_MESSAGE_PROVIDED,
-  INCORRECT_ID
-} from "../util/errors";
-import { MESSAGE_TYPES } from "../util/constants";
-
-export const getAllTeachers = async (_req, res, next) => {
-  try {
-    const teachers = await Todo.find({});
-    if (!teachers.length)
-      throw new ProblemError(
-        MESSAGE_TYPES.ERROR,
-        404,
-        NO_TODO_FOUND.TYPE,
-        NO_TODO_FOUND.DETAILS
-      );
-    return res.status(200).send(teachers);
-  } catch (error) {
-    next(error);
-  }
+export const getAllTeachers = async (req, res, next) => {
+  const data = {
+    institution: req.params.institution,
+    payload: [
+      { name: "Antonia Kulas", id: 1, nr: 3003, classes: ["Math 9B"] },
+      { name: "Samantha Schinner", id: 2, nr: 3017, classes: ["English 9B"] }
+    ]
+  };
+  return res.status(200).send(data);
 };
 
-export const getSpecificTeacher = async (_req, res, next) => {};
+export const getSpecificTeacher = async (req, res, next) => {
+  const teachers = [
+    { name: "Antonia Kulas", id: 1, nr: 3003, classes: ["Math 9B"] },
+    { name: "Samantha Schinner", id: 2, nr: 3017, classes: ["English 9B"] }
+  ];
 
-export const postTeacher = async (_req, res, next) => {};
+  const data = teachers[parseInt(req.params.id) - 1];
+  return res.status(200).send(data);
+};
+
+export const postTeacher = async (req, res, next) => {
+  console.log(req.body);
+  const data = {
+    institution: req.params.institution,
+    body: req.body
+  };
+  return res.status(200).send(data);
+};

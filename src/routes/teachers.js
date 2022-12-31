@@ -8,7 +8,7 @@ import {
 const teachersRouter = new Router();
 
 teachersRouter.get("/:id", getSpecificTeacher);
-teachersRouter.get("/", getAllTeachers);
-teachersRouter.post("/", postTeacher);
+teachersRouter.get("/all/:institution", getAllTeachers);
+teachersRouter.post("/:institution", postTeacher);
 
 export default teachersRouter;

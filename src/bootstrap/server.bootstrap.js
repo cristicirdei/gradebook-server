@@ -8,6 +8,8 @@ import healthRouter from "../routes/health";
 import studentsRouter from "../routes/student";
 import teachersRouter from "../routes/teachers";
 import gradesRouter from "../routes/grades";
+import classesRouter from "../routes/classes";
+import attendanceRouter from "../routes/attendance";
 
 export class Server {
   app = null;
@@ -38,6 +40,8 @@ export class Server {
     this.app.use("/students", studentsRouter);
     this.app.use("/teachers", teachersRouter);
     this.app.use("/grades", gradesRouter);
+    this.app.use("/attendance", attendanceRouter);
+    this.app.use("/classes", classesRouter);
 
     //  Error handling
     this.app.use(errorMiddleware);

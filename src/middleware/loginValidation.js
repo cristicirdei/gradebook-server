@@ -10,12 +10,11 @@ import {
   WRONG_EMAIL_FORMAT
 } from "../util/errors";
 
-const UserModule = require("../models/user");
-const User = UserModule.User;
-
 export default async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    console.log("email ", email);
+    console.log("password ", password);
 
     if (
       email === undefined ||
@@ -24,6 +23,7 @@ export default async (req, res, next) => {
       password === null ||
       validator.isEmpty(email)
     ) {
+      console.log("validation 1");
       throw new ProblemError(
         MESSAGE_TYPES.ERROR,
         ERROR_CODES.BAD_REQUEST,
@@ -33,6 +33,7 @@ export default async (req, res, next) => {
     }
 
     if (!validator.isEmail(email)) {
+      console.log("validation 2");
       throw new ProblemError(
         MESSAGE_TYPES.ERROR,
         ERROR_CODES.BAD_REQUEST,
@@ -41,23 +42,38 @@ export default async (req, res, next) => {
       );
     }
 
-    const user = await User.findOne({ email });
-    if (!user)
+    const user = {
+      institution: 7,
+      type1: "admin",
+      type: "teacher",
+      name1: "Antonia Kulas",
+      name: "Samantha Schinner",
+      id: 2,
+      password: "$2a$10$pC23qtOvgaPkStae4MLB/eRvvCUYquSWqDQFTW5XavELWLe6VqLcO",
+      email: "cirdeicristi24@gmail.com"
+    };
+
+    if (!user) {
+      console.log("validation 3");
       throw new ProblemError(
         MESSAGE_TYPES.ERROR,
         ERROR_CODES.NOT_FOUND,
         NO_USER_FOUND.TYPE,
         NO_USER_FOUND.DETAILS
       );
+    }
     const isMatch = await comparePassword(password, user.password);
     console.log;
-    if (!isMatch)
+
+    if (!isMatch) {
+      console.log("validation 4");
       throw new ProblemError(
         MESSAGE_TYPES.ERROR,
         ERROR_CODES.UNAUTHORIZED,
         INCORRECT_PASSWORD.TYPE,
         INCORRECT_PASSWORD.DETAILS
       );
+    }
   } catch (err) {
     next(err);
   }

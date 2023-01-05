@@ -13,8 +13,7 @@ import { MESSAGE_TYPES } from "../util/constants";
 
 export default async (req, res, next) => {
   try {
-    const { email, confirmPassword } = req.body;
-    let { password } = req.body;
+    const { email, confirmPassword, password } = req.body;
 
     /* validates user input */
     if (
@@ -25,6 +24,7 @@ export default async (req, res, next) => {
       password === undefined ||
       confirmPassword === undefined
     ) {
+      console.log("validation 1");
       throw new ProblemError(
         MESSAGE_TYPES.ERROR,
         ERROR_CODES.BAD_REQUEST,
@@ -34,6 +34,7 @@ export default async (req, res, next) => {
     }
 
     if (password !== confirmPassword) {
+      console.log("validation 2");
       throw new ProblemError(
         MESSAGE_TYPES.ERROR,
         ERROR_CODES.BAD_REQUEST,
@@ -42,6 +43,7 @@ export default async (req, res, next) => {
       );
     }
     if (!validator.isEmail(email)) {
+      console.log("validation 3");
       throw new ProblemError(
         MESSAGE_TYPES.ERROR,
         ERROR_CODES.BAD_REQUEST,
@@ -51,8 +53,9 @@ export default async (req, res, next) => {
     }
 
     //check if a user with the same email already exists
-    const user = await userExists(email);
+    const user = null;
     if (user) {
+      console.log("validation 4");
       throw new ProblemError(
         MESSAGE_TYPES.ERROR,
         ERROR_CODES.BAD_REQUEST,

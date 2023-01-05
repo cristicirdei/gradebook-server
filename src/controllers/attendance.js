@@ -99,3 +99,21 @@ export const getClassAttendance = async (req, res, next) => {
 export const getStudentAttendance = async (req, res, next) => {
   return res.status(200).send("attendance :)");
 };
+
+export const postNewAtt = async (req, res, next) => {
+  console.log(req.body);
+  const data = {
+    class: req.params.class,
+    body: req.body
+  };
+  return res.status(200).send(data);
+};
+
+export const postModifiedAtt = async (req, res, next) => {
+  console.log(req.body);
+  const data = {
+    class: req.params.class,
+    body: req.body
+  };
+  return res.status(200).send(data);
+};

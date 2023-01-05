@@ -99,3 +99,21 @@ export const getClassGrades = async (req, res, next) => {
 export const getStudentGrades = async (req, res, next) => {
   return res.status(200).send("grades :)");
 };
+
+export const postNewGrade = async (req, res, next) => {
+  console.log(req.body);
+  const data = {
+    class: req.params.class,
+    body: req.body
+  };
+  return res.status(200).send(data);
+};
+
+export const postModifiedGrade = async (req, res, next) => {
+  console.log(req.body);
+  const data = {
+    class: req.params.class,
+    body: req.body
+  };
+  return res.status(200).send(data);
+};

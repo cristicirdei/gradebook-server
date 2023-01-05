@@ -5,9 +5,11 @@ import {
   postStudent,
   postStudents
 } from "../controllers/students";
+import verifyUser from "../middleware/auth";
 
 const studentsRouter = new Router();
 
+studentsRouter.use(verifyUser);
 // get one student
 studentsRouter.get("/:id", getSpecificStudent);
 // get all students from an institution

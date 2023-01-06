@@ -3,5 +3,3 @@ export const MESSAGE_TYPES = {
   INFO: "info",
   WARNING: "warning"
 };
-
-export const TOKEN_EXPIRES_IN = "1h";

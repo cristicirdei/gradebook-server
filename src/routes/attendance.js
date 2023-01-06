@@ -1,20 +1,13 @@
 import { Router } from "express";
 import {
   getClassAttendance,
-  getStudentAttendance,
-  postModifiedAtt,
-  postNewAtt
-} from "../controllers/attendance";
-
-import verifyUser from "../middleware/auth";
+  postNewAttendance
+} from "../controllers/attendance.controller";
 
 const attendanceRouter = new Router();
 
-attendanceRouter.use(verifyUser);
-
-attendanceRouter.get("/class/:class", getClassAttendance);
-attendanceRouter.get("/student/:student", getStudentAttendance);
-attendanceRouter.post("/change", postModifiedAtt);
-attendanceRouter.post("/new", postNewAtt);
+attendanceRouter.get("/class/:id", getClassAttendance);
+//attendanceRouter.get("/student/:student", getStudentAttendance);
+attendanceRouter.post("/", postNewAttendance);
 
 export default attendanceRouter;

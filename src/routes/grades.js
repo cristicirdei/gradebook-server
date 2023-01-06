@@ -1,18 +1,10 @@
 import { Router } from "express";
-import {
-  getClassGrades,
-  getStudentGrades,
-  postNewGrade,
-  postModifiedGrade
-} from "../controllers/grades";
-import verifyUser from "../middleware/auth";
+import { getClassGrades, getStudentGrades, postNewGrade } from "../controllers/grades.controller";
 
 const gradesRouter = new Router();
 
-gradesRouter.use(verifyUser);
-gradesRouter.get("/class/:class", getClassGrades);
-gradesRouter.get("/student/:student", getStudentGrades);
-gradesRouter.post("/change", postModifiedGrade);
-gradesRouter.post("/new", postNewGrade);
+gradesRouter.get("/class/:id", getClassGrades);
+gradesRouter.get("/student/:id", getStudentGrades);
+gradesRouter.post("/", postNewGrade);
 
 export default gradesRouter;

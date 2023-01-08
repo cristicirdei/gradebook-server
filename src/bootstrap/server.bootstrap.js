@@ -10,7 +10,7 @@ import teachersRouter from "../routes/teachers";
 import gradesRouter from "../routes/grades";
 import classesRouter from "../routes/classes";
 import attendanceRouter from "../routes/attendance";
-import institutionRouter from "../routes/institution";
+import userRouter from "../routes/auth";
 
 export class Server {
   app = null;
@@ -43,7 +43,7 @@ export class Server {
     this.app.use("/grades", gradesRouter);
     this.app.use("/attendance", attendanceRouter);
     this.app.use("/classes", classesRouter);
-    this.app.use("/auth", institutionRouter);
+    this.app.use("/auth", userRouter);
     //  Error handling
     this.app.use(errorMiddleware);
   }

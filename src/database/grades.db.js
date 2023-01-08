@@ -1,6 +1,7 @@
 var mysql = require('mysql');
+module.exports = {getClassGrades,postNewGrade,postModifiedAttendance};
 
-export function getClassGrades(classId,callback){
+function getClassGrades(classId,callback){
   let array1 = [];
   let gradeList = [];
   let gradeSheet = [];
@@ -25,7 +26,11 @@ export function getClassGrades(classId,callback){
       let gradeNames = Object.values(JSON.parse(JSON.stringify(result[1])));
       let marks = Object.values(JSON.parse(JSON.stringify(result[2])));
     
-      marks.forEach(item => nameList.push(item.fullName))
+      marks.forEach(function(item){
+        if (nameList.includes(item.fullName) == false)
+          nameList.push(item.fullName);
+      });
+   
       gradeNames.forEach(item => array1.push(item.gradeName))
       nameList.forEach(item => {
         marks.forEach(function(element){
@@ -62,7 +67,7 @@ export function getClassGrades(classId,callback){
   });
 };
 
-export function postNewGrade(obj,callback){
+function postNewGrade(obj,callback){
   
   let enrolled = [];
   let marked = obj.values;
@@ -115,7 +120,7 @@ export function postNewGrade(obj,callback){
   })
 };
 
-export function postModifiedAttendance(obj,callback){
+function postModifiedAttendance(obj,callback){
  
   var con = mysql.createConnection({
     host: "localhost",
@@ -196,6 +201,6 @@ let test = {
 // });
 
 
-postModifiedAttendance(test,function(err,result){
-  console.log(result);
-});
+// postModifiedAttendance(test,function(err,result){
+//   console.log(result);
+// });

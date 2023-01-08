@@ -3,8 +3,10 @@
 var moment = require('moment');
 var mysql = require('mysql');
 
+module.exports = {getClassAttendance,postModifiedGrade,postNewAttendance};
 
-export function getClassAttendance(id,callback){
+
+function getClassAttendance(id,callback){
   let array1 = [];
   let array2 = [];
   let attendanceList = [];
@@ -22,15 +24,19 @@ export function getClassAttendance(id,callback){
   con.connect(function(err) {
     if (err) throw err;
     var command0 = `SELECT name,ID as id FROM class WHERE ID = ${id};`;
-    var command = `SELECT DISTINCT date FROM attendance WHERE classID = ${id};`;
-    var command2 = `SELECT fullName,date,value FROM attendance WHERE classID = ${id}`;
+    var command = `SELECT DISTINCT DATE_ADD(date,INTERVAL 1 DAY) as date FROM attendance WHERE classID = ${id};`;
+    var command2 = `SELECT fullName,DATE_ADD(date,INTERVAL 1 DAY) as date,value FROM attendance WHERE classID = ${id}`;
     con.query(mysql.format(command0+command+command2), function (err, result, fields) {
       if (err) throw err;
       let classinfo = Object.values(JSON.parse(JSON.stringify(result[0][0])));
       let dates = Object.values(JSON.parse(JSON.stringify(result[1])));
       let marks = Object.values(JSON.parse(JSON.stringify(result[2])));
+
+      marks.forEach(function(item){
+        if (nameList.includes(item.fullName) == false)
+          nameList.push(item.fullName);
+      });
    
-      marks.forEach(item => nameList.push(item.fullName))
       dates.forEach(item => array1.push(item.date))
       nameList.forEach(item => {
         marks.forEach(function(element){
@@ -69,7 +75,7 @@ export function getClassAttendance(id,callback){
   });
 };
 
-export function postNewAttendance(obj,callback){
+function postNewAttendance(obj,callback){
  
   let enrolled = [];
   let checked = obj.values;
@@ -121,7 +127,7 @@ export function postNewAttendance(obj,callback){
   })
 };
 
-export function postModifiedGrade(obj,callback){
+function postModifiedGrade(obj,callback){
  
   var con = mysql.createConnection({
     host: "localhost",
@@ -192,17 +198,17 @@ let test = {
   ]
 };
 
-getClassAttendance(2,function(err,result){
-   console.log(result);
-});
+// getClassAttendance(2,function(err,result){
+//    console.log(result);
+// });
 
 // postNewAttendance(test,function(err,result){
 //   console.log(result);
 // });
 
-postModifiedAttendance(test,function(err,result){
-  console.log(result);
-});
+// postModifiedAttendance(test,function(err,result){
+//   console.log(result);
+// });
 
 
 

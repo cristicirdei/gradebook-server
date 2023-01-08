@@ -1,7 +1,8 @@
 var mysql = require('mysql');
 
+module.exports = {getAllTeachers,getSpecificTeacher,postTeacher};
 
-export function getAllTeachers(institution,callback){
+function getAllTeachers(institution,callback){
   let nameList = [];
  
 
@@ -55,7 +56,7 @@ export function getAllTeachers(institution,callback){
 };
 
 
-export function getSpecificTeacher(id,callback){
+function getSpecificTeacher(id,callback){
   let data = [];
 
   var con = mysql.createConnection({
@@ -98,7 +99,7 @@ export function getSpecificTeacher(id,callback){
   
 };
 
-export function postTeacher(institution,obj,callback){
+function postTeacher(institution,obj,callback){
 
 
   getTeacherCount(function(err,data){
@@ -164,16 +165,16 @@ let test = {
   "email": "jreacher@asd",
   "password": "jumanji392"
 }
-getAllTeachers(1,function(err,result){
-  console.log(result);
+// getAllTeachers(1,function(err,result){
+//   console.log(result);
   
-});
+// });
 
-getSpecificTeacher(1,function(err,result){
-  console.log(result);
+// getSpecificTeacher(1,function(err,result){
+//   console.log(result);
   
-});
+// });
 
-postTeacher(2,test,function(err,result){
-  console.log(result);
-});
+// postTeacher(2,test,function(err,result){
+//   console.log(result);
+// });

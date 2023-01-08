@@ -1,7 +1,8 @@
 var mysql = require('mysql');
 
+module.exports = {getAllClasses,getSpecificClass,postClass,getTeacherClasses};
 
-export function getAllClasses(institution,callback){
+function getAllClasses(institution,callback){
   let data = {};
   let final = {};
   
@@ -35,7 +36,7 @@ export function getAllClasses(institution,callback){
 };
 
 
-export function getSpecificClass(id,callback){
+function getSpecificClass(id,callback){
   let data1 = {};
   let data2 = {};
   let lst = [];
@@ -73,7 +74,7 @@ export function getSpecificClass(id,callback){
 };
 
 
-export function getTeacherClasses(teacher,callback){
+function getTeacherClasses(teacher,callback){
   let data = {};
   let final = {};
 
@@ -104,7 +105,7 @@ export function getTeacherClasses(teacher,callback){
   });
 };
 
-export function postClass(institution,obj,callback){
+function postClass(institution,obj,callback){
   let enroll = false;
 
   getClassCount(function(err,data){
@@ -177,23 +178,23 @@ let test = {
   "teacherID": 3,
   "students" : [4,5]
 }
-getAllClasses(1,function(err,result){
-  console.log(result);
+// getAllClasses(1,function(err,result){
+//   console.log(result);
   
-});
+// });
 
-getTeacherClasses(1,function(err,result){
-  console.log(result);
+// getTeacherClasses(1,function(err,result){
+//   console.log(result);
   
-});
+// });
 
-getSpecificClass(1,function(err,result){
-  console.log(result);
+// getSpecificClass(1,function(err,result){
+//   console.log(result);
   
-});
+// });
 
-postClass(2,test,function(err,result){
-console.log(result);
-});
+// postClass(2,test,function(err,result){
+// console.log(result);
+// });
 
 

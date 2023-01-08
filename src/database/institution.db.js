@@ -1,7 +1,8 @@
 var mysql = require('mysql');
 
+module.exports = {getUser,postInstitution};
 
-export function getUser(obj,callback){
+function getUser(obj,callback){
 
   var con = mysql.createConnection({
     host: "localhost",
@@ -69,7 +70,7 @@ export function getUser(obj,callback){
   
 };
 
-export function postInstitution(obj,callback){
+function postInstitution(obj,callback){
   
   
     getInstitutionCount(function(err,data){
@@ -142,12 +143,12 @@ let institest = {
   "password": "spaceodissey68"
 }
 
-getUser(usertest,function(err,result){
-  console.log(result);
+// getUser(usertest,function(err,result){
+//   console.log(result);
     
-});
+// });
   
-postInstitution(institest,function(err,result){
- console.log(result);
-});
+// postInstitution(institest,function(err,result){
+//  console.log(result);
+// });
   

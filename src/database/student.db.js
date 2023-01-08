@@ -1,7 +1,8 @@
 var mysql = require('mysql');
 var moment = require('moment')
+module.exports = {getSpecificStudent,getAllStudents,postStudent};
 
-export function getAllStudents(institution,callback){
+function getAllStudents(institution,callback){
   let data = {};
   let final = {};
   
@@ -35,7 +36,7 @@ export function getAllStudents(institution,callback){
 };
 
 
-export function getSpecificStudent(id,callback){
+function getSpecificStudent(id,callback){
   let gradeList = [];
   let gradeSheet = [];
   let nameList = [];
@@ -84,10 +85,10 @@ export function getSpecificStudent(id,callback){
           gradeList = [];
         })
   
-        attendance.forEach(check => dateList.push(check.date));
+        attendance.forEach(check => dateList.push([check.date,check.name]));
         dateList.forEach(item => {
           attendance.forEach(function(element){
-            if (element.date == item){
+            if (element.date == item[0]){
               attList.push({
                 name : moment.utc(element.date).format('MM.DD.YY'),
                 value : element.value
@@ -95,7 +96,7 @@ export function getSpecificStudent(id,callback){
             }    
           });
           attSheet.push({
-            name : moment.utc(item).format('MM.DD.YY'),
+            name : item[1],
             values : attList
           });
           attList = [];
@@ -120,7 +121,7 @@ export function getSpecificStudent(id,callback){
   
 };
 
-export function postStudent(institution,obj,callback){
+function postStudent(institution,obj,callback){
 
   getStudentCount(function(err,data){
     if (err) {
@@ -184,16 +185,16 @@ let test = {
   "nr": 172, 
   "age": 23,
 }
-getAllStudents(1,function(err,result){
-  console.log(result);
+// getAllStudents(1,function(err,result){
+//   console.log(result);
   
-});
+// });
 
-getSpecificStudent(1,function(err,result){
-  console.log(result);
+// getSpecificStudent(1,function(err,result){
+//   console.log(result);
   
-});
+// });
 
-postStudent(2,test,function(err,result){
-  console.log(result);
-});
+// postStudent(2,test,function(err,result){
+//   console.log(result);
+// });

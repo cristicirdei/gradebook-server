@@ -44,6 +44,7 @@ export class Server {
     this.app.use("/attendance", attendanceRouter);
     this.app.use("/classes", classesRouter);
     this.app.use("/auth", userRouter);
+    
     //  Error handling
     this.app.use(errorMiddleware);
   }

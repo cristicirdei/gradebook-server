@@ -43,7 +43,7 @@ export class Server {
     this.app.use("/grades", gradesRouter);
     this.app.use("/attendance", attendanceRouter);
     this.app.use("/classes", classesRouter);
-    this.app.use("/institution", institutionRouter);
+    this.app.use("/auth", institutionRouter);
     //  Error handling
     this.app.use(errorMiddleware);
   }

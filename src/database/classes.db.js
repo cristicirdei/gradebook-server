@@ -1,12 +1,10 @@
 var mysql = require('mysql');
 
 
-export const getClassesByInstitutionID = async (req, res, next) => {
+export function getAllClasses(institution,callback){
   let data = {};
   let final = {};
-  let id = req.params.id;
-  console.log(id);
-
+  
   var con = mysql.createConnection({
     host: "localhost",
     user: "root",
@@ -16,17 +14,17 @@ export const getClassesByInstitutionID = async (req, res, next) => {
   
   con.connect(function(err) {
     if (err) throw err;
-    var sql = mysql.format("SELECT class.name,class.ID,count(studentID) AS students,CONCAT(teachers.name, ' ', teachers.surname) as teacher FROM class INNER JOIN enrollment ON class.ID = enrollment.classID INNER JOIN teachers ON teachers.ID = class.teacherID WHERE class.institutionID = ? GROUP BY class.ID", [id]);
+    var sql = mysql.format("SELECT class.name,class.ID as id,count(studentID) AS students,CONCAT(teachers.name, ' ', teachers.surname) as teacher FROM class INNER JOIN enrollment ON class.ID = enrollment.classID INNER JOIN teachers ON teachers.ID = class.teacherID WHERE class.institutionID = ? GROUP BY class.ID", [institution]);
     con.query(sql, function (err, result, fields) {
       if (err) throw err;
       data = Object.values(JSON.parse(JSON.stringify(result)));
       if (data.length == 0){
-        return res.status(404).send('Object not found!');
+        callback(err,'Object not found!');
       }
       else{
-        final['institution'] = id;
+        final['institution'] = institution;
         final['payload'] = data;
-        return res.status(200).send(final);
+        callback(null,final);
       }
         
     });
@@ -37,10 +35,9 @@ export const getClassesByInstitutionID = async (req, res, next) => {
 };
 
 
-export const getClassByID = async (req, res, next) => {
+export function getSpecificClass(id,callback){
   let data1 = {};
   let data2 = {};
-  let id = req.params.id;
   let lst = [];
 
   var con = mysql.createConnection({
@@ -61,12 +58,12 @@ export const getClassByID = async (req, res, next) => {
       data2 = Object.values(JSON.parse(JSON.stringify(result[1])));
 
       if (data1.length == 0){
-        return res.status(404).send('Object not found!');
+        callback(err,'Object not found!');
       }
       else{
         data2.forEach(element => lst.push(element.name + ' ' + element.surname));
         data1[0]["students"] = lst;
-        return res.status(200).send(data1[0]);
+        callback(null,data1[0]);
       }   
     });
     con.end();
@@ -76,11 +73,9 @@ export const getClassByID = async (req, res, next) => {
 };
 
 
-export const getClassesByTeacherID = async (req, res, next) => {
+export function getTeacherClasses(teacher,callback){
   let data = {};
   let final = {};
-  let id = req.params.id;
-  console.log(id);
 
   var con = mysql.createConnection({
     host: "localhost",
@@ -91,17 +86,17 @@ export const getClassesByTeacherID = async (req, res, next) => {
   
   con.connect(function(err) {
     if (err) throw err;
-    var sql = mysql.format("SELECT class.name,class.ID,count(studentID) AS students,CONCAT(teachers.name, ' ', teachers.surname) as teacher FROM class INNER JOIN enrollment ON class.ID = enrollment.classID INNER JOIN teachers ON teachers.ID = class.teacherID WHERE class.teacherID = ? GROUP BY class.ID", [id]);
+    var sql = mysql.format("SELECT class.name,class.ID as id,count(studentID) AS students,CONCAT(teachers.name, ' ', teachers.surname) as teacher FROM class INNER JOIN enrollment ON class.ID = enrollment.classID INNER JOIN teachers ON teachers.ID = class.teacherID WHERE class.teacherID = ? GROUP BY class.ID", [teacher]);
     con.query(sql, function (err, result, fields) {
       if (err) throw err;
       data = Object.values(JSON.parse(JSON.stringify(result)));
       if (data.length == 0){
-        return res.status(404).send('Object not found!');
+        callback(err,'Object not found!');
       }
       else{
-        final['teacher'] = id;
+        final['teacher'] = teacher;
         final['payload'] = data;
-        return res.status(200).send(final);
+        callback(null,final);
       }
          
     });
@@ -109,17 +104,14 @@ export const getClassesByTeacherID = async (req, res, next) => {
   });
 };
 
-export const postClass = async (req, res, next) => {
-  let obj = req.body;
+export function postClass(institution,obj,callback){
   let enroll = false;
 
   getClassCount(function(err,data){
     if (err) {
       console.log("ERROR : ",err);            
     } else {
-      console.log(data);
       let counter = data[0].counter + 1;
-      console.log(counter);
       var con = mysql.createConnection({
         host: "localhost",
         user: "root",
@@ -134,13 +126,13 @@ export const postClass = async (req, res, next) => {
           command = command + `INSERT INTO enrollment (classID,studentID) VALUES (${counter},${studentID});`;
         });
         command.slice(0, -1);
-        var sql = mysql.format("INSERT INTO class (ID,name,subject,description,institutionID,teacherID) VALUES (?,?,?,?,?,?)" + command, [counter,obj.name,obj.subject,obj.description,obj.institutionID,obj.teacherID]);
+        var sql = mysql.format("INSERT INTO class (ID,name,subject,description,institutionID,teacherID) VALUES (?,?,?,?,?,?)" + command, [counter,obj.name,obj.subject,obj.description,institution,obj.teacherID]);
         con.query(sql, function (err, result, fields) {
           if (err) 
-            return res.status(400).send(err.message);
+            callback(err,'Object not found!');
           else {
             enroll = true;
-            return res.status(201).send(obj);
+            callback(null,obj);
           }
         });
         
@@ -161,7 +153,7 @@ function getClassCount(callback){
   });
 
   con.connect(function(err) {
-    if (err) throw err.message;
+    if (err) throw err;
     var sql = mysql.format('SELECT COUNT(ID) as counter FROM class ');
     con.query(sql, function (err, result, fields) {
       if (err) 
@@ -176,5 +168,32 @@ function getClassCount(callback){
 
 };
 
+let test = {
+  "ID": 4,
+  "name": "Politics 10A",
+  "subject": "Politics",
+  "description": "10th grade politics",
+  "institutionID": 2,
+  "teacherID": 3,
+  "students" : [4,5]
+}
+getAllClasses(1,function(err,result){
+  console.log(result);
+  
+});
+
+getTeacherClasses(1,function(err,result){
+  console.log(result);
+  
+});
+
+getSpecificClass(1,function(err,result){
+  console.log(result);
+  
+});
+
+postClass(2,test,function(err,result){
+console.log(result);
+});
 
 

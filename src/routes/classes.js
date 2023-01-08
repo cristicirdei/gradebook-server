@@ -1,20 +1,22 @@
 import { Router } from "express";
 import {
-  getClassByID,
-  getClassesByInstitutionID,
-  getClassesByTeacherID,
+  getAllClasses,
+  getSpecificClass,
+  getTeacherClasses,
   postClass
-} from "../controllers/classes.controller";
+} from "../controllers/classes";
+import verifyUser from "../middleware/auth";
 
 const classesRouter = new Router();
 
+classesRouter.use(verifyUser);
 // get one class
-classesRouter.get("/:id", getClassByID);
-// get all classes by institutionID
-classesRouter.get("/institution/:id", getClassesByInstitutionID);
-// get all classes by teacherID
-classesRouter.get("/teacher/:id", getClassesByTeacherID);
+classesRouter.get("/:id", getSpecificClass);
+// get all classes from an institution
+classesRouter.get("/all/:institution", getAllClasses);
+// get all classes of a teacher
+classesRouter.get("/teacher/:teacher", getTeacherClasses);
 // post a class in an institution
-classesRouter.post("/", postClass);
+classesRouter.post("/:institution", postClass);
 
 export default classesRouter;

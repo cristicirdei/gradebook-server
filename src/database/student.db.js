@@ -1,12 +1,10 @@
-import moment from 'moment/moment.js'; 
-
 var mysql = require('mysql');
+var moment = require('moment')
 
-
-export const getStudents = async (req, res, next) => {
+export function getAllStudents(institution,callback){
   let data = {};
   let final = {};
-  let id = req.params.id;
+  
 
   var con = mysql.createConnection({
     host: "localhost",
@@ -17,17 +15,17 @@ export const getStudents = async (req, res, next) => {
 
   con.connect(function(err) {
     if (err) throw err;
-    var sql = mysql.format("SELECT CONCAT(student.name,' ',student.surname) as name,student.ID FROM student WHERE institutionID = ?",[id]);
+    var sql = mysql.format("SELECT CONCAT(student.name,' ',student.surname) as name,student.ID as id FROM student WHERE institutionID = ?",[institution]);
     con.query(sql, function (err, result, fields) {
       if (err) throw err;
       data = Object.values(JSON.parse(JSON.stringify(result)));
       if (data.length == 0){
-        return res.status(404).send('Object not found!');
+        callback(err,'Object not found!');
       }
       else{
-        final['institution'] = id;
+        final['institution'] = institution;
         final['payload'] = data;
-        return res.status(200).send(final);
+        callback(null,final);
       }
     });
 
@@ -37,17 +35,13 @@ export const getStudents = async (req, res, next) => {
 };
 
 
-export const getStudentByID = async (req, res, next) => {
+export function getSpecificStudent(id,callback){
   let gradeList = [];
   let gradeSheet = [];
   let nameList = [];
   var attList = [];
   var attSheet = [];
   var dateList = [];
- 
-  
-  let id = req.params.id;
-  console.log(id);
 
   var con = mysql.createConnection({
     host: "localhost",
@@ -70,7 +64,7 @@ export const getStudentByID = async (req, res, next) => {
       let attendance = Object.values(JSON.parse(JSON.stringify(result[2])));
       
       if (info.length == 0){
-        return res.status(404).send('Object not found!');
+        callback(err,'Object not found!');
       }
       else {
         grades.forEach(grade => nameList.push(grade.name));
@@ -106,17 +100,17 @@ export const getStudentByID = async (req, res, next) => {
           });
           attList = [];
         })
-  
+        
         let final = {
-          name : info.name,
-          id : info.id,
-          nr : info.nr,
-          age : info.age,
+          name : info[0].name,
+          id : info[0].ID,
+          nr : info[0].nr,
+          age : info[0].age,
           classes : nameList,
           grades : gradeSheet,
           attendance : attSheet
         }
-        return res.status(200).send(final);
+        callback(null,final);
       }
 
     });
@@ -126,9 +120,7 @@ export const getStudentByID = async (req, res, next) => {
   
 };
 
-export const postStudent = async (req, res, next) => {
-  let obj = req.body;
-
+export function postStudent(institution,obj,callback){
 
   getStudentCount(function(err,data){
     if (err) {
@@ -147,12 +139,12 @@ export const postStudent = async (req, res, next) => {
 
       con.connect(function(err) {
         if (err) throw err;
-        var sql = mysql.format("INSERT INTO student (ID,name,surname,nr,age,institutionID) VALUES (?,?,?,?,?,?)", [counter,obj.name,obj.surname,obj.nr,obj.age,obj.institutionID]);
+        var sql = mysql.format("INSERT INTO student (ID,name,surname,nr,age,institutionID) VALUES (?,?,?,?,?,?)", [counter,obj.name,obj.surname,obj.nr,obj.age,institution]);
         con.query(sql, function (err, result, fields) {
           if (err) 
-            return res.status(400).send(err.message);
+            callback(err,"Object not inserted!");
           else 
-            return res.status(201).send(obj);
+            callback(null,"Object inserted!");
         });
         con.end();
       });
@@ -185,3 +177,23 @@ function getStudentCount(callback){
   });
 
 };
+
+let test = { 
+  "name": "Shogun", 
+  "surname": "Diplomat", 
+  "nr": 172, 
+  "age": 23,
+}
+getAllStudents(1,function(err,result){
+  console.log(result);
+  
+});
+
+getSpecificStudent(1,function(err,result){
+  console.log(result);
+  
+});
+
+postStudent(2,test,function(err,result){
+  console.log(result);
+});

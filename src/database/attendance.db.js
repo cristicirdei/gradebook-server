@@ -1,15 +1,15 @@
-import moment from 'moment/moment.js'; 
+//import moment from 'moment/moment.js'; 
 
+var moment = require('moment');
 var mysql = require('mysql');
 
 
-export const getClassAttendance = async (req, res, next) => {
+export function getClassAttendance(id,callback){
   let array1 = [];
   let array2 = [];
   let attendanceList = [];
   let attendanceSheet = [];
   let nameList = [];
-  let id = req.params.id;
 
   var con = mysql.createConnection({
     host: "localhost",
@@ -29,7 +29,7 @@ export const getClassAttendance = async (req, res, next) => {
       let classinfo = Object.values(JSON.parse(JSON.stringify(result[0][0])));
       let dates = Object.values(JSON.parse(JSON.stringify(result[1])));
       let marks = Object.values(JSON.parse(JSON.stringify(result[2])));
-    
+   
       marks.forEach(item => nameList.push(item.fullName))
       dates.forEach(item => array1.push(item.date))
       nameList.forEach(item => {
@@ -57,10 +57,11 @@ export const getClassAttendance = async (req, res, next) => {
       }
 
       if (final.length == 0){
-        return res.status(404).send('Object not found!');
+        callback(err,'Object not found!');
       }
-      else
-        return res.status(200).send(final);
+      else{
+        callback(null,final);
+      }
       
     });
 
@@ -68,8 +69,8 @@ export const getClassAttendance = async (req, res, next) => {
   });
 };
 
-export const postNewAttendance = async (req, res, next) => {
-  let obj = req.body;
+export function postNewAttendance(obj,callback){
+ 
   let enrolled = [];
   let checked = obj.values;
   let names = [];
@@ -105,10 +106,11 @@ export const postNewAttendance = async (req, res, next) => {
         command.slice(0, -1);
         var sql = mysql.format(command);
         con.query(sql, function (err, result, fields) {
-          if (err) 
-            return res.status(400).send(err.message);
-          else {
-            return res.status(201).send(obj);
+          if (err){
+            callback(err,'Object not inserted!');
+          }
+          else{
+            callback(null,'Object inserted!');
           }
         });
         
@@ -117,6 +119,39 @@ export const postNewAttendance = async (req, res, next) => {
 
     } 
   })
+};
+
+export function postModifiedGrade(obj,callback){
+ 
+  var con = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "fulger2001",
+    database: "gradebook",
+    multipleStatements: "True"
+  });
+
+  con.connect(function(err) {
+    if (err) throw err;
+    let command = "";
+    obj.changes.forEach(item => {
+      command = command + `UPDATE attendance SET value = '${item.value}' WHERE date = '${moment(item.name,"DD.MM.YY").format('YYYY-MM-DD[T]HH:mm:ss')}' AND fullName = '${item.student}' AND classID = ${obj.class};`;
+    });
+    command.slice(0, -1);
+    var sql = mysql.format(command);
+    con.query(sql, function (err, result, fields) {
+      if (err){
+        callback(err,"Object not inserted!");
+      }
+      else{
+        callback(null,'Object inserted!');
+      }
+    });
+    
+    con.end();
+  });
+
+ 
 };
 
 function getEnrollments(classID,callback){
@@ -143,6 +178,31 @@ function getEnrollments(classID,callback){
     con.end();
   });
 }
+
+
+let test = {
+  "class": 2,
+  "changes": [
+      {"student": "Vasea Partizan", 
+      "name": "13.01.23",
+      "value": "Present" },
+      { "student": "Zmau Balaur",
+      "name": "13.01.23", 
+      "value": "Absent" }
+  ]
+};
+
+getClassAttendance(2,function(err,result){
+   console.log(result);
+});
+
+// postNewAttendance(test,function(err,result){
+//   console.log(result);
+// });
+
+postModifiedAttendance(test,function(err,result){
+  console.log(result);
+});
 
 
 

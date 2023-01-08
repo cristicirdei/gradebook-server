@@ -1,12 +1,9 @@
-
-
 var mysql = require('mysql');
 
 
-export const getTeachersByInstitutionID = async (req, res, next) => {
+export function getAllTeachers(institution,callback){
   let nameList = [];
-  let id = req.params.id;
-  console.log(id);
+ 
 
   var con = mysql.createConnection({
     host: "localhost",
@@ -18,15 +15,13 @@ export const getTeachersByInstitutionID = async (req, res, next) => {
   
   con.connect(function(err) {
     if (err) throw err;
-    var command = `SELECT CONCAT(name,' ',surname) as name,ID as id,nr FROM teachers WHERE institutionID = ${id};`;
-    var command2 = `SELECT class.name,teacherID FROM class WHERE institutionID = ${id}`;
+    var command = `SELECT CONCAT(name,' ',surname) as name,ID as id,nr FROM teachers WHERE institutionID = ${institution};`;
+    var command2 = `SELECT class.name,teacherID FROM class WHERE institutionID = ${institution}`;
     con.query(command+command2, function (err, result, fields) {
       if (err) throw err;
       let teachers = Object.values(JSON.parse(JSON.stringify(result[0])));
       let classes = Object.values(JSON.parse(JSON.stringify(result[1])));
 
-      console.log(teachers);
-      console.log(classes);
       let payload = [];
       teachers.forEach(item => {
         classes.forEach(function(element){
@@ -44,14 +39,14 @@ export const getTeachersByInstitutionID = async (req, res, next) => {
       });
       
       let final  = {
-        id : id,
+        institution : institution,
         payload : payload
       }
       if (final.length == 0){
-        return res.status(404).send('Object not found!');
+        callback(err,'Objects not found!');
       }
       else
-        return res.status(200).send(final);
+        callback(null,final);
       
     });
     con.end();
@@ -60,10 +55,8 @@ export const getTeachersByInstitutionID = async (req, res, next) => {
 };
 
 
-export const getTeacherByID = async (req, res, next) => {
+export function getSpecificTeacher(id,callback){
   let data = [];
-  let id = req.params.id;
-  console.log(id);
 
   var con = mysql.createConnection({
     host: "localhost",
@@ -85,7 +78,7 @@ export const getTeacherByID = async (req, res, next) => {
       classes.forEach(item => data.push(item.name))
       
       if (info.length == 0){
-        return res.status(404).send('Object not found!');
+        callback(err,'Object not found!');
       }
       else{
         info = info[0];
@@ -96,7 +89,7 @@ export const getTeacherByID = async (req, res, next) => {
           nr : info.nr,
           classes : data
         }
-        return res.status(200).send(final);
+        callback(null,final);
       }    
     });
     con.end();
@@ -105,16 +98,14 @@ export const getTeacherByID = async (req, res, next) => {
   
 };
 
-export const postTeacher = async (req, res, next) => {
-  let obj = req.body;
+export function postTeacher(institution,obj,callback){
+
 
   getTeacherCount(function(err,data){
     if (err) {
       console.log("ERROR : ",err);            
     } else {
-      console.log(data);
       let counter = data[0].counter + 1;
-      console.log(counter);
       var con = mysql.createConnection({
         host: "localhost",
         user: "root",
@@ -124,12 +115,12 @@ export const postTeacher = async (req, res, next) => {
       });
       con.connect(function(err) {
         if (err) throw err;
-        var sql = mysql.format("INSERT INTO teachers (ID,name,surname,nr,age,email,password,institutionID) VALUES (?,?,?,?,?,?,?,?)", [counter,obj.name,obj.surname,obj.nr,obj.age,obj.email,obj.password,obj.institutionID]);
+        var sql = mysql.format("INSERT INTO teachers (ID,name,surname,nr,age,email,password,institutionID) VALUES (?,?,?,?,?,?,?,?)", [counter,obj.name,obj.surname,obj.nr,obj.age,obj.email,obj.password,institution]);
         con.query(sql, function (err, result, fields) {
           if (err) 
-            return res.status(400).send(err.message);
+            callback(err,"Object not inserted!");
           else 
-            return res.status(201).send(obj);
+            callback(null,"Object inserted!");
         });
         con.end();
       });
@@ -151,7 +142,7 @@ function getTeacherCount(callback){
 
   con.connect(function(err) {
     if (err) throw err.message;
-    var sql = mysql.format('SELECT COUNT(ID) as counter FROM teacher ');
+    var sql = mysql.format('SELECT COUNT(ID) as counter FROM teachers');
     con.query(sql, function (err, result, fields) {
       if (err) 
         callback(err,null);
@@ -164,3 +155,25 @@ function getTeacherCount(callback){
   });
 
 };
+
+let test = { 
+  "name": "Jack", 
+  "surname": "Reacher", 
+  "nr": 423, 
+  "age": 30,
+  "email": "jreacher@asd",
+  "password": "jumanji392"
+}
+getAllTeachers(1,function(err,result){
+  console.log(result);
+  
+});
+
+getSpecificTeacher(1,function(err,result){
+  console.log(result);
+  
+});
+
+postTeacher(2,test,function(err,result){
+  console.log(result);
+});

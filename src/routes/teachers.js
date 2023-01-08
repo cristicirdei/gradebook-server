@@ -1,14 +1,16 @@
 import { Router } from "express";
 import {
-  getTeacherByID,
-  postTeacher,
-  getTeachersByInstitutionID
-} from "../controllers/teacher.controller";
+  getAllTeachers,
+  getSpecificTeacher,
+  postTeacher
+} from "../controllers/teachers";
+import verifyUser from "../middleware/auth";
 
 const teachersRouter = new Router();
 
-teachersRouter.get("/:id", getTeacherByID);
-teachersRouter.get("/institution/:id", getTeachersByInstitutionID);
-teachersRouter.post("/", postTeacher);
+teachersRouter.use(verifyUser);
+teachersRouter.get("/:id", getSpecificTeacher);
+teachersRouter.get("/all/:institution", getAllTeachers);
+teachersRouter.post("/:institution", postTeacher);
 
 export default teachersRouter;

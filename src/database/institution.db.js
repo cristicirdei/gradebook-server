@@ -1,9 +1,7 @@
 var mysql = require('mysql');
 
 
-export const getUser = async (req, res, next) => {
-
-  let obj = req.body;
+export function getUser(obj,callback){
 
   var con = mysql.createConnection({
     host: "localhost",
@@ -33,7 +31,7 @@ export const getUser = async (req, res, next) => {
             password : senpai[0].password,
             type : 'admin',
             name : senpai[0].name,
-            institution : senpai[0].institutionID
+            institution : senpai[0].institution
           }
         }
       }
@@ -46,7 +44,7 @@ export const getUser = async (req, res, next) => {
             password : soldier[0].password,
             type : 'teacher',
             name : soldier[0].name,
-            institution : soldier[0].institutionID
+            institution : soldier[0].institution
           }
         }
       }
@@ -59,10 +57,10 @@ export const getUser = async (req, res, next) => {
       
        
       if (final.length == 0){
-        return res.status(404).send('Object not found!');
+        callback(err,'Object not found!');
       }
       else
-        return res.status(200).send(final);
+        callback(null,final);
       
     });
     con.end();
@@ -71,16 +69,14 @@ export const getUser = async (req, res, next) => {
   
 };
 
-export const postInstitution = async (req, res, next) => {
-    let obj = req.body;
+export function postInstitution(obj,callback){
+  
   
     getInstitutionCount(function(err,data){
       if (err) {
         console.log("ERROR : ",err);            
       } else {
-        console.log(data);
         let counter = data[0].counter + 1;
-        console.log(counter);
         var con = mysql.createConnection({
           host: "localhost",
           user: "root",
@@ -91,15 +87,15 @@ export const postInstitution = async (req, res, next) => {
         con.connect(function(err) {
           if (err) throw err;
           console.log(obj);
-          var command2 = `INSERT INTO admin (ID,login,password,institutionID) VALUES (${counter},'${obj.email}','${obj.password}',${counter})`;
-          var command1 = `INSERT INTO institution (ID,name,adminID) VALUES (${counter},'${obj.name}',${counter});`;
+          var command2 = `INSERT INTO admin (ID,email,password,institutionID) VALUES (${counter},'${obj.email}','${obj.password}',${counter});`;
+          var command1 = `INSERT INTO institution (ID,name,adminID) VALUES (${counter},'${obj.name}',${counter})`;
           //var command3 = `ALTER TABLE institution ADD FOREIGN KEY (adminID) REFERENCES administrator(ID);`;
           //var command4 = `ALTER TABLE administrator ADD FOREIGN KEY (institutionID) REFERENCES institution(ID)`;
-          con.query(mysql.format(command1+command2), function (err, result, fields) {
+          con.query(mysql.format(command2+command1), function (err, result, fields) {
             if (err) 
-              return res.status(400).send(err);
+              callback(err,"Objects not inserted!");
             else 
-              return res.status(201).send("Objects inserted!");
+              callback(null,"Objects inserted!");
           });
           con.end();
         });
@@ -134,3 +130,24 @@ export const postInstitution = async (req, res, next) => {
     });
   
   };
+
+let usertest = {
+  "email": "jreacher@asd",
+  "password": "jumanji392"
+}
+
+let institest = {
+  "name" : "UNIBUC",
+  "email": "senpai@asd",
+  "password": "spaceodissey68"
+}
+
+getUser(usertest,function(err,result){
+  console.log(result);
+    
+});
+  
+postInstitution(institest,function(err,result){
+ console.log(result);
+});
+  

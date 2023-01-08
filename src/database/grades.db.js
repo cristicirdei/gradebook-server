@@ -1,11 +1,10 @@
 var mysql = require('mysql');
 
-export const getClassGrades = async (req, res, next) => {
+export function getClassGrades(classId,callback){
   let array1 = [];
   let gradeList = [];
   let gradeSheet = [];
   let nameList = [];
-  let id = req.params.id;
 
   var con = mysql.createConnection({
     host: "localhost",
@@ -17,9 +16,9 @@ export const getClassGrades = async (req, res, next) => {
 
   con.connect(function(err) {
     if (err) throw err;
-    var command0 = `SELECT name,ID as id FROM class WHERE ID = ${id};`;
-    var command = `SELECT DISTINCT gradeName FROM grade WHERE classID = ${id};`;
-    var command2 = `SELECT fullName,gradeName,value FROM grade WHERE classID = ${id}`;
+    var command0 = `SELECT name,ID as id FROM class WHERE ID = ${classId};`;
+    var command = `SELECT DISTINCT gradeName FROM grade WHERE classID = ${classId};`;
+    var command2 = `SELECT fullName,gradeName,value FROM grade WHERE classID = ${classId}`;
     con.query(mysql.format(command0+command+command2), function (err, result, fields) {
       if (err) throw err;
       let classinfo = Object.values(JSON.parse(JSON.stringify(result[0][0])));
@@ -52,44 +51,10 @@ export const getClassGrades = async (req, res, next) => {
       }
 
       if (final.length == 0){
-        return res.status(404).send('Object not found!');
-      }
-      else
-        return res.status(200).send(final);
-      
-    });
-
-    con.end();
-  });
-};
-
-export const getStudentGrades = async (req, res, next) => {
-  let data = {};
-  let final = {};
-  let id = req.params.id;
-
-  var con = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "fulger2001",
-    database: "gradebook"
-  });
-
-  con.connect(function(err) {
-    if (err) throw err.message;
-    var values = "SELECT name,value FROM grade WHERE studentID = ?";
-    var classes = "SELECT class.name as name FROM class INNER JOIN enrollment ON enrollment.classID = class.ID WHERE studentID = 1?";
-    var sql = mysql.format("SELECT CONCAT(student.name,' ',student.surname) as name,student.ID as id,nr,age,FROM grade WHERE studentID = ?",[id]);
-    con.query(sql, function (err, result, fields) {
-      if (err) throw err;
-      data = Object.values(JSON.parse(JSON.stringify(result)));
-      if (data.length == 0){
-        return res.status(404).send('Object not found!');
+        callback(err,'Object not found!');
       }
       else{
-        final['teacher'] = id;
-        final['payload'] = data;
-        return res.status(200).send(final);
+        callback(null,final);
       }
     });
 
@@ -97,8 +62,8 @@ export const getStudentGrades = async (req, res, next) => {
   });
 };
 
-export const postNewGrade = async (req, res, next) => {
-  let obj = req.body;
+export function postNewGrade(obj,callback){
+  
   let enrolled = [];
   let marked = obj.values;
   let names = [];
@@ -108,6 +73,7 @@ export const postNewGrade = async (req, res, next) => {
     if (err) {
       console.log("ERROR : ",err);            
     } else {
+      console.log(data);
       enrolled = data;
       var con = mysql.createConnection({
         host: "localhost",
@@ -134,10 +100,11 @@ export const postNewGrade = async (req, res, next) => {
         command.slice(0, -1);
         var sql = mysql.format(command);
         con.query(sql, function (err, result, fields) {
-          if (err) 
-            return res.status(400).send(err.message);
-          else {
-            return res.status(201).send(obj);
+          if (err){
+            callback(err,'Object not inserted!');
+          }
+          else{
+            callback(null,'Object inserted!');
           }
         });
         
@@ -146,6 +113,39 @@ export const postNewGrade = async (req, res, next) => {
 
     } 
   })
+};
+
+export function postModifiedAttendance(obj,callback){
+ 
+  var con = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "fulger2001",
+    database: "gradebook",
+    multipleStatements: "True"
+  });
+
+  con.connect(function(err) {
+    if (err) throw err;
+    let command = "";
+    obj.changes.forEach(item => {
+      command = command + `UPDATE grade SET value = '${item.value}' WHERE gradeName = '${item.grade}' AND fullName = '${item.student}' AND classID = ${obj.class};`;
+    });
+    command.slice(0, -1);
+    var sql = mysql.format(command);
+    con.query(sql, function (err, result, fields) {
+      if (err){
+        callback(err,"Object not inserted!");
+      }
+      else{
+        callback(null,'Object inserted!');
+      }
+    });
+    
+    con.end();
+  });
+
+ 
 };
 
 
@@ -173,3 +173,29 @@ function getEnrollments(classID,callback){
     con.end();
   });
 }
+
+let test = {
+  "class": 2,
+  "changes": [
+      {"student": "Vasea Partizan", 
+      "grade": "Test 2",
+      "value": "3" },
+      { "student": "Zmau Balaur", 
+      "grade": "Test 2",
+      "value": "5" }
+  ]
+}
+
+// getClassGrades(1,function(err,result){
+//   console.log(result);
+//   console.log(result.students[0]);
+// });
+
+// postNewGrade(test,function(err,result){
+//   console.log(result);
+// });
+
+
+postModifiedAttendance(test,function(err,result){
+  console.log(result);
+});

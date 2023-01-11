@@ -1,36 +1,55 @@
 import { hashPassword } from "../util/hashPassword";
 import tokenGenerator from "../util/tokenGenerator";
+import { postInstitutionData, getUserData } from "../database/institution.db";
 
 export const postUserSignup = async (req, res, next) => {
-  const body = req.body;
+  const { name, email, confirmPassword } = req.body;
+  const password = await hashPassword(req.body.password);
+  const user = {
+    name: name,
+    email: email,
+    password: password
+  };
 
-  const password = await hashPassword(body.password);
-
-  //add user
-
-  return res.status(200).send({ body, hashed: password });
+  postInstitutionData(user, function (err, result) {
+    console.log(result);
+    return res.status(200).send(result);
+  });
 };
 
 export const postUserLogin = async (req, res, next) => {
   const body = req.body;
 
   const user = {
-    institution: 7,
+    institution: 1,
     type1: "admin",
     type: "teacher",
-    name1: "Antonia Kulas",
-    name: "Samantha Schinner",
-    id: 2
+    name: "Antonia Kulas",
+    name2: "Samantha Schinner",
+    id: 1
   };
 
   const payload = {
     id: user.id,
-    email: body.email
+    email: body.email,
+    institution: user.institution,
+    name: user.name,
+    type: user.type
   };
 
-  const token = tokenGenerator(payload);
+  console.log(req.body);
 
-  console.log("token ", token);
-
-  return res.status(200).send({ token });
+  getUserData(req.body, function (err, result) {
+    console.log(result);
+    if (result.data) {
+      const token = tokenGenerator(result.data);
+      console.log("token ", token);
+      return res.status(200).send({ token });
+    } else {
+      return res.status(404).send(result);
+    }
+  });
 };
+
+// $2a$10$8iayW5MjmgQO0anEZWeZluQp9fOXnvI//42dgMcExvvzwi6PIinwS
+// $2a$10$eA79aVUnTvcn1pC1gMHd/ectrxWaLUC5UwD5S6p6WIK.D3psSnoqu

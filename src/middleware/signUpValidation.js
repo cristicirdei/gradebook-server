@@ -1,5 +1,5 @@
 import validator from "validator";
-import { userExists } from "../database/databaseOperations";
+
 import {
   ERROR_CODES,
   USER_ALREADY_EXISTS,

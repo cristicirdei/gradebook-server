@@ -9,6 +9,7 @@ import {
   INCORRECT_PASSWORD,
   WRONG_EMAIL_FORMAT
 } from "../util/errors";
+import { getUserData } from "../database/institution.db";
 
 export default async (req, res, next) => {
   try {
@@ -40,7 +41,39 @@ export default async (req, res, next) => {
       );
     }
 
-    const user = {
+    let user;
+    getUserData(req.body, function (err, result) {
+      console.log(result);
+      if (result.data) {
+        user = result.data;
+      } else {
+        user = null;
+      }
+
+      if (!user) {
+        console.log("validation 3 login");
+        throw new ProblemError(
+          MESSAGE_TYPES.ERROR,
+          ERROR_CODES.NOT_FOUND,
+          NO_USER_FOUND.TYPE,
+          NO_USER_FOUND.DETAILS
+        );
+      }
+      const isMatch = comparePassword(password, user.password);
+
+      if (!isMatch) {
+        console.log("validation 4");
+        throw new ProblemError(
+          MESSAGE_TYPES.ERROR,
+          ERROR_CODES.UNAUTHORIZED,
+          INCORRECT_PASSWORD.TYPE,
+          INCORRECT_PASSWORD.DETAILS
+        );
+      }
+    });
+    console.log("user: ", user);
+
+    const user1 = {
       institution: 7,
       type1: "admin",
       type: "teacher",
@@ -50,28 +83,6 @@ export default async (req, res, next) => {
       password: "$2a$10$pC23qtOvgaPkStae4MLB/eRvvCUYquSWqDQFTW5XavELWLe6VqLcO",
       email: "cirdeicristi24@gmail.com"
     };
-
-    if (!user) {
-      console.log("validation 3");
-      throw new ProblemError(
-        MESSAGE_TYPES.ERROR,
-        ERROR_CODES.NOT_FOUND,
-        NO_USER_FOUND.TYPE,
-        NO_USER_FOUND.DETAILS
-      );
-    }
-    const isMatch = await comparePassword(password, user.password);
-    console.log;
-
-    if (!isMatch) {
-      console.log("validation 4");
-      throw new ProblemError(
-        MESSAGE_TYPES.ERROR,
-        ERROR_CODES.UNAUTHORIZED,
-        INCORRECT_PASSWORD.TYPE,
-        INCORRECT_PASSWORD.DETAILS
-      );
-    }
   } catch (err) {
     next(err);
   }

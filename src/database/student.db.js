@@ -35,7 +35,7 @@ export function getAllStudentsData(institution, callback) {
 }
 
 export function getSpecificStudentData(id, callback) {
-  let gradeList = [];
+  /* let gradeList = [];
   let gradeSheet = [];
   let nameList = [];
   var attList = [];
@@ -67,7 +67,10 @@ export function getSpecificStudentData(id, callback) {
         if (info.length == 0) {
           callback(err, "Object not found!");
         } else {
-          grades.forEach((grade) => nameList.push(grade.name));
+          grades.forEach(function (item) {
+            if (nameList.includes(item.name) == false) nameList.push(item.name);
+          });
+
           nameList.forEach((item) => {
             grades.forEach(function (element) {
               if (element.name == item) {
@@ -84,9 +87,10 @@ export function getSpecificStudentData(id, callback) {
             gradeList = [];
           });
 
-          attendance.forEach((check) =>
-            dateList.push([check.date, check.name])
-          );
+          attendance.forEach(function (check) {
+            if (dateList.includes([check.date, check.name]) == false)
+              dateList.push([check.date, check.name]);
+          });
 
           dateList.forEach((item) => {
             attendance.forEach(function (element) {
@@ -98,11 +102,101 @@ export function getSpecificStudentData(id, callback) {
               }
             });
             attSheet.push({
-              name : item[1],
+              name: item[1],
               values: attList
             });
             attList = [];
           });
+
+          let final = {
+            name: info[0].name,
+            id: info[0].ID,
+            nr: info[0].nr,
+            age: info[0].age,
+            classes: nameList,
+            grades: gradeSheet,
+            attendance: attSheet
+          };
+          callback(null, final);
+        }
+      }
+    );
+    con.end();
+  });*/
+  let gradeList = [];
+  let gradeSheet = [];
+  let nameList = [];
+  var attList = [];
+  var attSheet = [];
+  var dateList = [];
+
+  var con = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "fulger2001",
+    database: "gradebook",
+    multipleStatements: "True"
+  });
+
+  con.connect(function (err) {
+    if (err) throw err;
+    var command0 = `SELECT CONCAT(name," ",surname) as name,ID,nr,age FROM student WHERE ID = ${id};`;
+    var command1 = `SELECT class.name,gradeName,value FROM grade INNER JOIN class on class.ID = grade.classID WHERE studentID = ${id};`;
+    var command2 = `SELECT class.name,DATE_ADD(date,INTERVAL 1 DAY) as date,value FROM attendance INNER JOIN class on class.ID = attendance.classID WHERE studentID = ${id}`;
+    con.query(
+      mysql.format(command0 + command1 + command2),
+      function (err, result, fields) {
+        if (err) throw err;
+
+        let info = Object.values(JSON.parse(JSON.stringify(result[0])));
+        let grades = Object.values(JSON.parse(JSON.stringify(result[1])));
+        let attendance = Object.values(JSON.parse(JSON.stringify(result[2])));
+
+        if (info.length == 0) {
+          callback(err, "Object not found!");
+        } else {
+          grades.forEach(function (item) {
+            if (nameList.includes(item.name) == false) nameList.push(item.name);
+          });
+
+          nameList.forEach((item) => {
+            grades.forEach(function (element) {
+              if (element.name == item) {
+                gradeList.push({
+                  name: element.gradeName,
+                  value: element.value
+                });
+              }
+            });
+            gradeSheet.push({
+              name: item,
+              values: gradeList
+            });
+            gradeList = [];
+          });
+
+          attendance.forEach(function (check) {
+            if (dateList.includes(check.name) == false)
+              dateList.push(check.name);
+          });
+
+          dateList.forEach((item) => {
+            attendance.forEach(function (element) {
+              if (element.name == item) {
+                attList.push({
+                  name: moment.utc(element.date).format("MM.DD.YY"),
+                  value: element.value
+                });
+              }
+            });
+            attSheet.push({
+              name: item,
+              values: attList
+            });
+            attList = [];
+          });
+
+          console.log("name", attSheet);
 
           let final = {
             name: info[0].name,

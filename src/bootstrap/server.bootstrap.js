@@ -21,21 +21,6 @@ export class Server {
     this.app.use(express.json());
     this.app.use(cors());
 
-    /*const IS_NOT_PRODUCTION = process.env.NODE_ENV !== "production";
-    if (IS_NOT_PRODUCTION) {
-      this.app.use("/docs", serve, setup(swaggerDocument));
-    }
-
-    //  Swagger error validator
-    this.app.use(
-      OpenApiValidator.middleware({
-        apiSpec: swaggerDocument,
-        validateRequests: true,
-        validateResponses: true
-      })
-    );
-    */
-
     //  Declaring API routes
     this.app.use("/health", healthRouter);
     this.app.use("/students", studentsRouter);
@@ -47,6 +32,7 @@ export class Server {
     //  Error handling
     this.app.use(errorMiddleware);
   }
+
   listen(port) {
     this.app.listen(port, () => {
       console.log(`Server started on port ${port}`);
